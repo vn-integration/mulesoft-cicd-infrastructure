@@ -1,0 +1,62 @@
+version: '3.7'
+
+# #################################################################################################
+# Local development infrastructure for Mulesoft CICD
+# #################################################################################################
+
+services:
+
+  # ###############################################################################################
+  # Jenkins
+  # ###############################################################################################
+  mule-jenkins:
+    container_name: m-jenkins
+    image: jenkins/jenkins:jdk11
+    ports:
+      - '18080:8080'
+    environment:
+      JENKINS_USERNAME: jenkins
+      JENKINS_PASSWORD: mule
+      JENKINS_EMAIL: mule@local.com
+    volumes:
+      - mule-jenkins-data:/var/jenkins_home
+    networks:
+      - mule-infra
+
+  # ###############################################################################################
+  # Sonarqube
+  # ###############################################################################################
+  mule-sonar:
+    image: sonarqube:9.0-community
+    container_name: m-sonarqube
+    ports:
+      - "19000:9000"
+    volumes:
+      - mule-sonar-config:/opt/sonarqube/conf
+      - mule-sonar-data:/opt/sonarqube/data
+      - ./config/sonar/extensions:/opt/sonarqube/extensions
+    networks:
+      - mule-infra
+
+  # ###############################################################################################
+  # Nexus
+  # ###############################################################################################
+  mule-nexus:
+    image: sonatype/nexus3
+    container_name: m-nexus
+    volumes:
+      - mule-nexus-data:/nexus-data
+    ports:
+      - "18081:8081"
+  
+# #################################################################################################
+volumes:
+  mule-jenkins-data:
+  mule-sonar-config:
+  mule-sonar-data:
+  mule-nexus-data:
+
+# #################################################################################################
+networks:
+  mule-infra:
+    name: mule-infra
